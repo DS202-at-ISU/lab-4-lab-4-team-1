@@ -1,0 +1,28 @@
+---
+title: "Progress Report"
+author: "Heike Hofmann"
+date: "2022-11-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(Lahman)
+library(dplyr)
+library(ggplot2)
+head(HallOfFame, 3)
+
+HallOfFame %>% 
+  ggplot(aes(x = yearID, fill = inducted)) +
+  geom_bar() +
+  xlim(c(1936, 2024))
+```
+
+```{r}
+write.csv(HallOfFame, "HallOfFame.csv", row.names = FALSE)
+```
+
+
