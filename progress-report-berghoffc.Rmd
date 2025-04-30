@@ -1,0 +1,47 @@
+---
+title: "progress-report-berghoffc"
+output: html_document
+---
+``` {r}
+library(Lahman)
+
+head(HallOfFame)
+
+```
+
+
+```{r}
+library(rvest)
+library(tidyverse)
+url <- "https://www.baseball-reference.com/awards/hof_2025.shtml"
+html <- read_html(url)
+html
+
+tables <- html %>% html_table(fill=TRUE)
+
+data = tables[[1]]
+
+colnames(data) <- as.character(unlist(data[1,]))
+
+data = data[-1,]
+data = data[, -(6:39)]
+
+head(data)
+```
+
+``` {r}
+data <- data %>% mutate(
+  yearID = 2025,
+  votedBy = "BBWAA",
+  ballots = 394,
+  needed = 296,
+  inducted = ifelse(Votes>=296, "Y", "N"),
+  category = "Player", # don't know yet
+  needed_note = NA # not sure what would go here
+) %>% rename(
+  votes = Votes
+)
+
+data %>% head()
+
+```

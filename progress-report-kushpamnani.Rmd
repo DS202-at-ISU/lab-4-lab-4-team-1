@@ -1,0 +1,82 @@
+---
+title: "progress-report-kushpamnani.Rmd"
+author: "Kush Pamnani"
+date: "2025-04-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Libraries
+```{r libraries}
+library(rvest)
+library(dplyr)
+library(readr)
+library(stringr)
+```
+
+## Scrape the Hall of Fame 2025 Data
+```{r scrape-data}
+url <- "https://www.baseball-reference.com/awards/hof_2025.shtml"
+html <- read_html(url)
+tables <- html_table(html)
+
+# Assign the first table to a data frame
+data <- tables[[1]]
+```
+
+## Clean the Data
+```{r clean-data}
+# The first row has actual column names
+actual_col_names <- data[1, ]
+colnames(data) <- actual_col_names
+
+# Force unique column names to avoid duplicates
+colnames(data) <- make.names(colnames(data), unique = TRUE)
+
+# Remove the first row which was header information
+data <- data[-1, ]
+
+# Convert Votes and %vote columns to numeric
+data$Votes <- as.numeric(data$Votes)
+data$X.vote <- parse_number(data$X.vote)
+```
+
+## Prepare Final Dataset to Match Lahman's HallOfFame Structure
+```{r prepare-final-data}
+# Assume total ballots is 394
+total_ballots <- 394
+needed_votes <- ceiling(0.75 * total_ballots)
+
+# Create the final dataset
+final_data <- data %>%
+  mutate(
+    playerID = NA, # Manual matching needed normally
+    yearID = 2025,
+    votedBy = "BBWAA",
+    ballots = total_ballots,
+    needed = needed_votes,
+    votes = Votes,
+    inducted = ifelse(X.vote >= 75, "Y", "N"),
+    category = "Player",
+    needed_note = NA
+  ) %>%
+  select(playerID, yearID, votedBy, ballots, needed, votes, inducted, category, needed_note)
+
+# View the cleaned final dataset
+head(final_data)
+```
+
+## Save Individual Work (Optional)
+```{r save-final}
+# Save your individual work if needed (not required)
+# write_csv(final_data, "hall_of_fame_2025_individual.csv")
+```
+
+## Notes
+- Successfully scraped the 2025 Hall of Fame voting data from Baseball Reference.
+- Cleaned column names and removed duplicates.
+- Converted necessary columns to numeric.
+- Prepared the final dataset to match the structure expected in the Lahman HallOfFame table.
